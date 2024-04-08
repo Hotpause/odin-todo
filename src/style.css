@@ -1,0 +1,18 @@
+.main_container {
+  border: 3px solid red;
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 1fr 4fr;
+}
+
+.project_side {
+  border: 3px solid green;
+}
+
+.todo_side {
+  border: 3px solid blue;
+}
+
+body {
+  margin: 0;
+}
