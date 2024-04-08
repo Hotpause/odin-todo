@@ -2,15 +2,19 @@
   border: 3px solid red;
   display: grid;
   height: 100vh;
-  grid-template-columns: 1fr 4fr;
+  grid-template-columns: 1fr 3fr 1fr;
 }
 
-.project_side {
+.container_left {
   border: 3px solid green;
 }
 
-.todo_side {
+.container_right {
   border: 3px solid blue;
+}
+
+.container_three {
+  border: 3px solid orange;
 }
 
 body {
