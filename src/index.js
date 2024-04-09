@@ -4,11 +4,20 @@ import todo from './todo';
 
 console.log("Hello Worlddd");
 
+
+let currentproject;
+const projectsarr = [];
 const projectdiv = document.querySelector(".projects");
 const inputfield = document.querySelector(".projectinput");
 const submitbutton = document.querySelector(".submitbutton");
 const todoButton = document.querySelector(".todo_buttons");
 const todosContainer = document.querySelector(".todos");
+
+
+
+
+
+
 
 function createNewProject() {
     submitbutton.addEventListener("click", () => {
@@ -16,14 +25,52 @@ function createNewProject() {
         const projectname = inputfield.value.trim();
         if (projectname) {
             const newproject = new project(projectname);
+            projectsarr.push(newproject);
             console.log(newproject);
 
             const projectnametab = document.createElement("h2");
             projectnametab.classList.add("projectclick");
             projectnametab.textContent = projectname;
             projectdiv.appendChild(projectnametab);
+            selectproject();
         }
     });
+}
+
+function selectproject() {
+
+    const projectclicks = document.querySelectorAll(".projectclick");
+    projectclicks.forEach(projectclick => {
+        projectclick.addEventListener("click", () => {
+            const projectname = projectclick.textContent; // Store the name of the clicked project
+            currentproject = projectsarr.find(proj => proj.name === projectname);
+            console.log("Current Project:", currentproject); // For debugging purposes
+            displayTodoOfProject(currentproject);
+        });
+    });
+
+
+
+
+
+}
+
+function displayTodoOfProject(projectToBeShown) {
+
+    todosContainer.innerHTML = "";
+
+    projectToBeShown.todos.forEach(todo => {
+        // Create HTML elements for each todo and append them to the todosContainer
+        createtodoelement(todo);
+    });
+
+
+    // input = project object
+    // empty the todos div
+    // then append the divs in project there
+
+    // 1.loop through todos of currnt project
+    // 2. createtodoelement(for each todo)
 }
 
 function createtodoform() {
@@ -72,15 +119,13 @@ function createtodoform() {
 
             if (title && desc && date && priority) {
                 const newtodo = new todo(title, desc, date, priority);
+                currentproject.addtodo(newtodo);
                 createtodoelement(newtodo);
                 form1.remove();
             } else {
                 alert("Please fill all fields");
             }
         });
-
-
-
 
     }
 }
@@ -120,6 +165,7 @@ console.log(todoButton);
 
 
 createNewProject();
+selectproject();
 
 
 
