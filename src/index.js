@@ -5,6 +5,8 @@ import todo from './todo';
 console.log("Hello Worlddd");
 
 
+
+
 let currentproject;
 const projectsarr = [];
 const projectdiv = document.querySelector(".projects");
@@ -13,28 +15,128 @@ const submitbutton = document.querySelector(".submitbutton");
 const todoButton = document.querySelector(".todo_buttons");
 const todosContainer = document.querySelector(".todos");
 
+function saveToLocalStorage() {
+    localStorage.setItem('projects', JSON.stringify(projectsarr));
+}
+
+// Function to load projects (and todos) from localStorage
+function loadFromLocalStorage() {
+    try {
+        const storedProjects = localStorage.getItem('projects');
+        if (storedProjects) {
+            const parsedProjects = JSON.parse(storedProjects);
+            // Iterate over stored projects and recreate them
+            parsedProjects.forEach(storedProject => {
+                const newProject = new project(storedProject.name);
+                storedProject.todos.forEach(storedTodo => {
+                    const newTodo = new todo(storedTodo.title, storedTodo.description, storedTodo.duedate, storedTodo.priority);
+                    newProject.addtodo(newTodo);
+                });
+                projectsarr.push(newProject);
+            });
+        } else {
+            createprojectfromname("test");
+            const testProject = projectsarr.find(proj => proj.name === "test");
+            if (testProject) {
+                const dummyTodo1 = new todo("Dummy Todo 1", "Description for Dummy Todo 1", "2024-04-15", 1);
+                const dummyTodo2 = new todo("Dummy Todo 2", "Description for Dummy Todo 2", "2024-04-16", 2);
+                testProject.addtodo(dummyTodo1);
+                testProject.addtodo(dummyTodo2);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading projects from localStorage:', error);
+        // Handle the error here, e.g., show a message to the user or fallback to default behavior
+    }
+}
+
+loadFromLocalStorage();
+renderProjects();
 
 
 
+function renderProjects() {
+    // Clear existing project list
+    projectdiv.innerHTML = "";
+
+    // Render each project from the stored data
+    projectsarr.forEach(project => {
+        const projecttab = document.createElement("div");
+        projecttab.classList.add("projecttab");
+
+        const projectnametab = document.createElement("h2");
+        projectnametab.classList.add("projectclick");
+        projectnametab.textContent = project.name;
+
+        const deletebuttonpj = document.createElement("button");
+        deletebuttonpj.textContent = "DELETE";
+        deletebuttonpj.addEventListener("click", () => {
+            deleteproject(project); // Call a function to handle delete operation
+        });
+
+        projecttab.appendChild(projectnametab);
+        projecttab.appendChild(deletebuttonpj);
+        projectdiv.appendChild(projecttab);
+    });
+
+    selectproject(); // Reinitialize event listeners for project clicks
+}
 
 
+function updateLocalStorage() {
+    saveToLocalStorage();
+}
+
+
+function createprojectfromname(nameofproject) {
+    if (nameofproject) {
+
+        const projecttab = document.createElement("div")
+        projecttab.classList.add("projecttab");
+
+        projectdiv.appendChild(projecttab);
+
+        const newproject = new project(nameofproject);
+        projectsarr.push(newproject);
+        console.log(newproject);
+
+        const projectnametab = document.createElement("h2");
+        projectnametab.classList.add("projectclick");
+        projectnametab.textContent = nameofproject;
+
+        const deletebuttonpj = document.createElement("button");
+        deletebuttonpj.textContent = "DELETE"
+        deletebuttonpj.addEventListener("click", () => {
+            deleteproject(project); // Call a function to handle delete operation
+        });
+
+
+        projecttab.appendChild(projectnametab);
+        projecttab.appendChild(deletebuttonpj);
+        selectproject();
+        updateLocalStorage();
+        renderProjects();
+        currentproject = newproject;
+    }
+
+}
 
 function createNewProject() {
     submitbutton.addEventListener("click", () => {
 
         const projectname = inputfield.value.trim();
-        if (projectname) {
-            const newproject = new project(projectname);
-            projectsarr.push(newproject);
-            console.log(newproject);
-
-            const projectnametab = document.createElement("h2");
-            projectnametab.classList.add("projectclick");
-            projectnametab.textContent = projectname;
-            projectdiv.appendChild(projectnametab);
-            selectproject();
-        }
+        createprojectfromname(projectname);
     });
+}
+
+function deleteproject(projectToDelete) {
+    const index = projectsarr.indexOf(projectToDelete);
+    if (index !== -1) {
+        projectsarr.splice(index, 1);
+        // Update the UI to reflect changes
+        renderProjects();
+        updateLocalStorage();
+    }
 }
 
 function selectproject() {
@@ -80,7 +182,7 @@ function createtodoform() {
         console.log("Function entes the if barrier");
         const form1 = document.createElement("form");
         form1.classList.add("todo-form");
-        todosContainer.appendChild(form1);
+        todosContainer.insertBefore(form1, todosContainer.firstChild);
 
         form1.style.border = "2px solid red"; // Add a red border to the form
         form1.style.margin = "20px"; // Add some margin to the form
@@ -122,6 +224,7 @@ function createtodoform() {
                 currentproject.addtodo(newtodo);
                 createtodoelement(newtodo);
                 form1.remove();
+                updateLocalStorage();
             } else {
                 alert("Please fill all fields");
             }
@@ -134,28 +237,121 @@ function createtodoelement(todo) {
     const todotab = document.createElement("div");
     todotab.classList.add("todotab");
 
-    const todoname = document.createElement("div");
-    todoname.classList.add("name");
-    todoname.textContent = todo.title;
-    todotab.appendChild(todoname);
+    const titleLabel = document.createElement("label");
+    titleLabel.textContent = "Title:";
+    titleLabel.style.fontWeight = "bold"; // Bold style for the label
+    const title = document.createElement("div");
+    title.textContent = todo.title;
 
-    const tododesc = document.createElement("div");
-    tododesc.classList.add("description");
-    tododesc.textContent = todo.description;
-    todotab.appendChild(tododesc);
+    const descLabel = document.createElement("label");
+    descLabel.textContent = "Description:";
+    descLabel.style.fontWeight = "bold"; // Bold style for the label
+    const description = document.createElement("div");
+    description.textContent = todo.description;
 
-    const tododate = document.createElement("div");
-    tododate.classList.add("date");
-    tododate.textContent = todo.duedate;
-    todotab.appendChild(tododate);
+    const dateLabel = document.createElement("label");
+    dateLabel.textContent = "Due Date:";
+    dateLabel.style.fontWeight = "bold"; // Bold style for the label
+    const duedate = document.createElement("div");
+    duedate.textContent = todo.duedate;
 
-    const todopriority = document.createElement("div");
-    todopriority.classList.add("priority");
-    todopriority.textContent = todo.priority;
-    todotab.appendChild(todopriority);
+    const priorityLabel = document.createElement("label");
+    priorityLabel.textContent = "Priority:";
+    priorityLabel.style.fontWeight = "bold"; // Bold style for the label
+    const priority = document.createElement("div");
+    priority.textContent = todo.priority;
 
-    todosContainer.appendChild(todotab);
+    const editbutton = document.createElement("button");
+    editbutton.textContent = "edit";
+    editbutton.addEventListener("click", () => {
+        editTodo(todo); // Call a function to handle edit operation
+    });
+
+    const deletebutton = document.createElement("button");
+    deletebutton.textContent = "delete"
+    deletebutton.addEventListener("click", () => {
+        deleteTodo(todo); // Call a function to handle delete operation
+    });
+
+    todotab.appendChild(titleLabel);
+    todotab.appendChild(title);
+    todotab.appendChild(descLabel);
+    todotab.appendChild(description);
+    todotab.appendChild(dateLabel);
+    todotab.appendChild(duedate);
+    todotab.appendChild(priorityLabel);
+    todotab.appendChild(priority);
+    todotab.appendChild(editbutton);
+    todotab.appendChild(deletebutton);
+
+
+    todosContainer.insertBefore(todotab, todosContainer.firstChild);
+
 };
+
+function editTodo(todo) {
+    const editForm = document.createElement("form");
+    editForm.classList.add("edit-form");
+
+    const titleLabel = document.createElement("label");
+    titleLabel.textContent = "Title:";
+    const titleInput = document.createElement("input");
+    titleInput.type = "text";
+    titleInput.value = todo.title;
+    editForm.appendChild(titleLabel);
+    editForm.appendChild(titleInput);
+
+    const descLabel = document.createElement("label");
+    descLabel.textContent = "Description:";
+    const descInput = document.createElement("input");
+    descInput.type = "text";
+    descInput.value = todo.description;
+    editForm.appendChild(descLabel);
+    editForm.appendChild(descInput);
+
+    const dateLabel = document.createElement("label");
+    dateLabel.textContent = "Due Date:";
+    const dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.value = todo.duedate;
+    editForm.appendChild(dateLabel);
+    editForm.appendChild(dateInput);
+
+    const priorityLabel = document.createElement("label");
+    priorityLabel.textContent = "Priority:";
+    const priorityInput = document.createElement("input");
+    priorityInput.type = "number";
+    priorityInput.value = todo.priority;
+    editForm.appendChild(priorityLabel);
+    editForm.appendChild(priorityInput);
+
+    const submitButton = document.createElement("button");
+    submitButton.textContent = "Update";
+    submitButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        todo.title = titleInput.value;
+        todo.description = descInput.value;
+        todo.duedate = dateInput.value;
+        todo.priority = priorityInput.value;
+        // Update the UI to reflect changes
+        displayTodoOfProject(currentproject);
+        editForm.remove();
+        updateLocalStorage();
+    });
+    editForm.appendChild(submitButton);
+
+    todosContainer.appendChild(editForm);
+}
+
+function deleteTodo(todo) {
+    const index = currentproject.todos.indexOf(todo);
+    if (index !== -1) {
+        currentproject.todos.splice(index, 1);
+        // Update the UI to reflect changes
+        displayTodoOfProject(currentproject);
+        updateLocalStorage();
+    }
+}
 
 todoButton.addEventListener("click", createtodoform);
 console.log(todoButton);
@@ -171,6 +367,22 @@ selectproject();
 
 
 
+// Create Template Project with fake todos
+// const templateProject = new project('Template Project');
+
+// const todo1 = new todo('Task 1', 'Description for Task 1', '2024-04-10', 1);
+// const todo2 = new todo('Task 2', 'Description for Task 2', '2024-04-11', 2);
+// const todo3 = new todo('Task 3', 'Description for Task 3', '2024-04-12', 3);
+// const todo4 = new todo('Task 4', 'Description for Task 4', '2024-04-13', 4);
+// const todo5 = new todo('Task 5', 'Description for Task 5', '2024-04-14', 5);
+
+// templateProject.addtodo(todo1);
+// templateProject.addtodo(todo2);
+// templateProject.addtodo(todo3);
+// templateProject.addtodo(todo4);
+// templateProject.addtodo(todo5);
+
+// projectsarr.push(templateProject);
 
 
 
