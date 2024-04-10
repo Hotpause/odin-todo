@@ -73,7 +73,7 @@ h1 {
 
 .selected {
   /* Add styling for selected project tabs here */
-  background-color: #e0e0e0; /* Light gray background */
+  background-color: red; /* Light gray background */
   border: 2px solid #00bcd4; /* Light blue border */
   border-radius: 5px; /* Rounded corners */
 }
