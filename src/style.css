@@ -71,8 +71,11 @@ h1 {
   cursor: pointer;
 }
 
-.projecttab.active {
-  background-color: #e0e0e0; /* Change background color to indicate selection */
+.selected {
+  /* Add styling for selected project tabs here */
+  background-color: #e0e0e0; /* Light gray background */
+  border: 2px solid #00bcd4; /* Light blue border */
+  border-radius: 5px; /* Rounded corners */
 }
 
 .deletebuttonpj,
@@ -125,6 +128,7 @@ h1 {
   margin: 30px 0;
   padding: 20px;
 }
+
 .container_left {
   width: 30%;
 }

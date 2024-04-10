@@ -68,6 +68,16 @@ function renderProjects() {
         projectnametab.classList.add("projectclick");
         projectnametab.textContent = project.name;
 
+        projectnametab.addEventListener("click", () => {
+            // Remove highlight from previously selected project
+            const previousSelectedProject = document.querySelector(".selected");
+            if (previousSelectedProject) {
+                previousSelectedProject.classList.remove("selected");
+            }
+            // Highlight the clicked project
+            projectnametab.classList.add("selected");
+        });
+
         const deletebuttonpj = document.createElement("button");
         deletebuttonpj.textContent = "DELETE";
         deletebuttonpj.addEventListener("click", () => {
@@ -90,18 +100,23 @@ function updateLocalStorage() {
 
 function createprojectfromname(nameofproject) {
     if (nameofproject) {
+        const existingProject = projectsarr.find(project => project.name === nameofproject);
+        if (existingProject) {
+            alert("A project with this name already exists. Please choose a different name.");
+            return; // Exit the function early if the project already exists
+        }
 
-        const projecttab = document.createElement("div")
+        const projecttab = document.createElement("div");
         projecttab.classList.add("projecttab");
 
         projectdiv.appendChild(projecttab);
 
         const newproject = new project(nameofproject);
         projectsarr.push(newproject);
-        console.log(newproject);
+        console.log("New Project:", newproject); // Log the new project
 
         const projectnametab = document.createElement("h2");
-        projectnametab.classList.add("projectclick");
+        projectnametab.classList.add("projectclick", "selected"); // Add the "selected" class
         projectnametab.textContent = nameofproject;
 
         const deletebuttonpj = document.createElement("button");
@@ -110,15 +125,23 @@ function createprojectfromname(nameofproject) {
             deleteproject(project); // Call a function to handle delete operation
         });
 
-
         projecttab.appendChild(projectnametab);
         projecttab.appendChild(deletebuttonpj);
+
+        const allProjectTabs = document.querySelectorAll('.projectclick');
+        allProjectTabs.forEach(tab => tab.classList.remove('selected'));
+
+        // Add "selected" class to the newly created project tab
+        projectnametab.classList.add('selected');
+
+        // Update the current project
+        currentproject = newproject;
+        console.log("Current Project:", currentproject); // Log the current project
+
         selectproject();
         updateLocalStorage();
         renderProjects();
-        currentproject = newproject;
     }
-
 }
 
 function createNewProject() {
@@ -133,6 +156,7 @@ function deleteproject(projectToDelete) {
     const index = projectsarr.indexOf(projectToDelete);
     if (index !== -1) {
         projectsarr.splice(index, 1);
+        todosContainer.innerHTML = "";
         // Update the UI to reflect changes
         renderProjects();
         updateLocalStorage();
